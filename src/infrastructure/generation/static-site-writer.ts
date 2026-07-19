@@ -487,7 +487,7 @@ const template = (inputProfile: CreatorProfile): string => {
   .about-photos img:nth-child(2){transform:translateY(26px)}
 
   .brew{background:var(--green-deep);position:relative;overflow:hidden}
-  .style-showcase{height:200svh;background:#111;overflow:visible}
+  .style-showcase{height:350svh;background:#111;overflow:visible}
   .styles-sticky{position:sticky;top:0;height:100svh;min-height:700px;overflow:hidden}
   .styles-media,.styles-frame-stage,.styles-frame-stage img,.styles-scrim{position:absolute;inset:0;width:100%;height:100%}
   .styles-frame-stage img{object-fit:cover;display:block}
@@ -527,7 +527,7 @@ const template = (inputProfile: CreatorProfile): string => {
   .styles-cards .brew-tags{display:none}
   @media(max-width:820px){.styles-cards .brew-grid{grid-template-columns:1fr}}
   @media(max-width:820px){.styles-cards .brew-card{min-height:390px}.styles-cards .style-card-content{padding:28px}.styles-cards .brew-card h3{font-size:2rem}}
-  @media(max-width:820px){.style-showcase{height:170svh;min-height:0}.styles-sticky{position:sticky;top:0;height:100svh;min-height:0}.styles-video-copy{left:5vw;right:5vw;top:50%;bottom:auto}.styles-video-copy h2{font-size:clamp(2.2rem,10vw,3.4rem)}.styles-content{position:relative;top:auto;min-height:0;margin-top:-100svh;padding-top:78px;padding-bottom:78px;display:block}.style-showcase .brew-head{margin-bottom:28px}.style-showcase .brew-grid{grid-template-columns:1fr;position:relative;gap:14px}.style-showcase .brew-card{padding:24px;backdrop-filter:blur(7px);animation:none}.style-showcase .big-emoji{font-size:2.1rem}.style-showcase .brew-card h3{font-size:1.35rem}.style-showcase .brew-card p{font-size:.92rem}}
+  @media(max-width:820px){.style-showcase{height:300svh;min-height:0}.styles-sticky{position:sticky;top:0;height:100svh;min-height:0}.styles-video-copy{left:5vw;right:5vw;top:50%;bottom:auto}.styles-video-copy h2{font-size:clamp(2.2rem,10vw,3.4rem)}.styles-content{position:relative;top:auto;min-height:0;margin-top:-100svh;padding-top:78px;padding-bottom:78px;display:block}.style-showcase .brew-head{margin-bottom:28px}.style-showcase .brew-grid{grid-template-columns:1fr;position:relative;gap:14px}.style-showcase .brew-card{padding:24px;backdrop-filter:blur(7px);animation:none}.style-showcase .big-emoji{font-size:2.1rem}.style-showcase .brew-card h3{font-size:1.35rem}.style-showcase .brew-card p{font-size:.92rem}}
   .brew-head{text-align:center;margin-bottom:54px}
   .brew-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;max-width:1000px;margin:0 auto}
   @media(max-width:820px){.brew-grid{grid-template-columns:1fr}}
@@ -1159,7 +1159,7 @@ const template = (inputProfile: CreatorProfile): string => {
   addEventListener('scroll', updateStyleProgress, {passive:true});
   addEventListener('resize', updateStyleProgress, {passive:true});
   (function stylesScrubLoop() {
-    styleCurrentProgress += (styleTargetProgress - styleCurrentProgress) * .14;
+    styleCurrentProgress += (styleTargetProgress - styleCurrentProgress) * .06;
     if (Math.abs(styleTargetProgress - styleCurrentProgress) <= .0004) styleCurrentProgress = styleTargetProgress;
     setStyleFrame(Math.round(styleCurrentProgress * (styleFramePaths.length - 1)));
     requestAnimationFrame(stylesScrubLoop);
