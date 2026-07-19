@@ -6,7 +6,6 @@ import { LocalAssetCopier } from "./infrastructure/filesystem/local-asset-copier
 import { StaticSiteWriter } from "./infrastructure/generation/static-site-writer.js";
 import { ProfileCache } from "./infrastructure/instagram/profile-cache.js";
 import { PublicInstagramScraper } from "./infrastructure/instagram/public-instagram-scraper.js";
-import { FrameSequenceGenerator } from "./infrastructure/video/frame-sequence-generator.js";
 
 const run = async (): Promise<void> => {
   const handle = process.argv[2]?.replace(/^@/, "").replace(/\.$/, "");
@@ -19,7 +18,6 @@ const run = async (): Promise<void> => {
     new PublicInstagramScraper(),
     new AssetDownloader(),
     new LocalAssetCopier(),
-    new FrameSequenceGenerator(),
     new StaticSiteWriter(),
     new ProfileCache(process.cwd())
   );

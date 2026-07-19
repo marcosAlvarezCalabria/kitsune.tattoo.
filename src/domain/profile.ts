@@ -25,12 +25,6 @@ export interface HeroVideo {
   readonly posterPath: string;
 }
 
-export interface HeroFrameSequence {
-  readonly framePaths: readonly string[];
-  readonly width: number;
-  readonly height: number;
-}
-
 export interface CreatorProfile {
   readonly handle: string;
   readonly displayName: string;
@@ -42,7 +36,6 @@ export interface CreatorProfile {
   readonly styles: readonly string[];
   readonly profileImage: ProfileImage;
   readonly heroVideo: HeroVideo;
-  readonly heroFrameSequence: HeroFrameSequence;
   readonly portfolioPosts: readonly PortfolioPost[];
   readonly profileUrl: string;
   readonly generatedAt: string;

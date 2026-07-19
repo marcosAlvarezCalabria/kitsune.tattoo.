@@ -213,8 +213,7 @@ const template = (inputProfile: CreatorProfile): string => {
   const followers = getMetricValue(profile, "Seguidores");
   const posts = getMetricValue(profile, "Posts");
   const following = getMetricValue(profile, "Siguiendo");
-  const heroPoster = profile.heroFrameSequence.framePaths[0] ?? profile.heroVideo.posterPath;
-  const heroFramesJson = JSON.stringify(profile.heroFrameSequence.framePaths);
+  const heroPoster = profile.heroVideo.posterPath;
   const aboutLead = compactText(profile.portfolioPosts[0]?.caption ?? "Tattoo portfolio");
   const aboutSupport = compactText(profile.portfolioPosts[2]?.caption ?? "Japanese and color tattoo work.");
 
@@ -327,12 +326,10 @@ const template = (inputProfile: CreatorProfile): string => {
     display:flex;flex-direction:column;
   }
   .hero-media{position:absolute;top:86px;right:0;bottom:54px;left:0;display:flex;align-items:flex-end;z-index:1;background:#050505}
-  .hero-frame-stage{position:absolute;inset:0;width:100%;height:100%}
-  .hero-frame-stage img{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-    opacity:0;transition:opacity .08s linear;will-change:opacity;
-  }
-  .hero-frame-stage img.is-active{opacity:1}
+  .hero-video-poster,.hero-scroll-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero-video-poster{display:block}
+  .hero-scroll-video{display:block;opacity:0;background:#050505;transition:opacity .22s ease}
+  .hero-scroll-video.is-ready{opacity:1}
   .hero-media::after{
     content:"";position:absolute;inset:0;
     background:linear-gradient(180deg,rgba(16,21,19,.16) 0%,rgba(16,21,19,0) 32%);
@@ -395,8 +392,7 @@ const template = (inputProfile: CreatorProfile): string => {
     .hero{height:400vh}
     .hero-sticky{position:sticky;top:0;height:100svh;min-height:0;overflow:hidden;background:#050505;padding-top:0}
     .hero-media{position:absolute;inset:0;display:block;z-index:1;background:#050505}
-    .hero-frame-stage{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto}
-    .hero-frame-stage img{object-fit:contain;object-position:center center}
+    .hero-video-poster,.hero-scroll-video{object-fit:contain;object-position:center center}
     .hero-content{position:absolute;z-index:2;left:0;right:0;top:50%;bottom:auto;transform:translateY(-50%);padding:0 8vw;text-align:center}
     .hero-marquee-top{top:82px}.hero-marquee-bottom{bottom:18px}
     .hero h1{font-size:clamp(2rem,8vw,3rem);margin:.15em 0 0}
@@ -753,13 +749,10 @@ const template = (inputProfile: CreatorProfile): string => {
 <section class="hero" id="top">
   <div class="hero-sticky">
     <div class="hero-media">
-      <div
-        class="hero-frame-stage"
-        id="heroFrameStage"
-        data-frames='${escapeHtml(heroFramesJson)}'
-      >
-        <img src="${escapeHtml(heroPoster)}" alt="${cleanText(profile.displayName)} hero frame" class="is-active" id="heroFrameCurrent">
-      </div>
+      <img class="hero-video-poster" src="${escapeHtml(heroPoster)}" alt="" aria-hidden="true">
+      <video class="hero-scroll-video" id="heroScrollVideo" muted playsinline webkit-playsinline preload="auto" poster="${escapeHtml(heroPoster)}" aria-label="Presentación de ${cleanText(profile.displayName)}">
+        <source src="${escapeHtml(profile.heroVideo.localPath)}" type="video/mp4">
+      </video>
     </div>
     <div class="hero-content">
       <span class="hero-kicker">tattoo with character</span>
@@ -1036,51 +1029,18 @@ const template = (inputProfile: CreatorProfile): string => {
     processVideo.addEventListener('ended', () => processVideoShell.classList.remove('playing'));
   }
 
-  const heroFrameStage = document.getElementById('heroFrameStage');
-  const heroFrameCurrent = document.getElementById('heroFrameCurrent');
+  const heroScrollVideo = document.getElementById('heroScrollVideo');
   const heroSec = document.querySelector('.hero');
   const heroContent = document.querySelector('.hero-content');
   const heroProgress = document.getElementById('heroProgress');
-  const framePaths = (() => {
-    if (!heroFrameStage) return [];
-    try {
-      return JSON.parse(heroFrameStage.dataset.frames || '[]');
-    } catch {
-      return [];
-    }
-  })();
-  const frameCache = [];
-  let currentFrameIndex = 0;
-
-  function preloadHeroFrame(index) {
-    if (!framePaths[index] || frameCache[index]) return;
-    const image = new Image();
-    image.decoding = 'async';
-    image.src = framePaths[index];
-    frameCache[index] = image;
-  }
-
-  function preloadHeroFrames() {
-    const initialCount = matchMedia('(max-width: 760px)').matches ? 30 : framePaths.length;
-    framePaths.slice(0, initialCount).forEach((_, index) => {
-      preloadHeroFrame(index);
-    });
-  }
-
-  function preloadHeroWindow(index) {
-    if (!matchMedia('(max-width: 760px)').matches) return;
-    for (let nextIndex = index + 1; nextIndex <= Math.min(index + 30, framePaths.length - 1); nextIndex += 1) {
-      preloadHeroFrame(nextIndex);
-    }
-  }
-
-  function setHeroFrame(index) {
-    if (!heroFrameCurrent || !framePaths.length) return;
-    const safeIndex = Math.max(0, Math.min(index, framePaths.length - 1));
-    preloadHeroWindow(safeIndex);
-    if (safeIndex === currentFrameIndex && heroFrameCurrent.getAttribute('src') === framePaths[safeIndex]) return;
-    currentFrameIndex = safeIndex;
-    heroFrameCurrent.setAttribute('src', framePaths[safeIndex]);
+  if (heroScrollVideo instanceof HTMLVideoElement) {
+    heroScrollVideo.addEventListener('loadeddata', () => {
+      heroScrollVideo.pause();
+      heroScrollVideo.classList.add('is-ready');
+    }, { once:true });
+    heroScrollVideo.load();
+    // A muted inline play/pause primes video decoding on iPhone without autoplaying the hero.
+    heroScrollVideo.play().then(() => heroScrollVideo.pause()).catch(() => undefined);
   }
 
   let targetP = 0;
@@ -1096,15 +1056,20 @@ const template = (inputProfile: CreatorProfile): string => {
   }, {passive:true});
 
   (function scrubLoop() {
-    currentP += (targetP - currentP) * 0.14;
+    currentP += (targetP - currentP) * 0.06;
     if (Math.abs(targetP - currentP) <= 0.0004) {
       currentP = targetP;
     }
 
     currentP = normalizeProgress(currentP);
 
-    if (framePaths.length) {
-      setHeroFrame(Math.round(currentP * (framePaths.length - 1)));
+    if (heroScrollVideo instanceof HTMLVideoElement && Number.isFinite(heroScrollVideo.duration) && heroScrollVideo.duration > 0) {
+      const targetTime = currentP * heroScrollVideo.duration;
+      if (!heroScrollVideo.seeking && Math.abs(heroScrollVideo.currentTime - targetTime) > (1 / 30)) {
+        heroScrollVideo.currentTime = targetTime;
+      }
+    }
+    if (heroProgress && heroContent) {
       heroProgress.style.width = (currentP * 100) + '%';
       const opacity = Math.max(1 - currentP * 2.2, 0);
       heroContent.style.opacity = opacity;
@@ -1114,9 +1079,6 @@ const template = (inputProfile: CreatorProfile): string => {
     }
     requestAnimationFrame(scrubLoop);
   })();
-
-  preloadHeroFrames();
-  setHeroFrame(0);
 
   const stylesScrollVideo = document.getElementById('stylesScrollVideo');
   const stylesSection = document.getElementById('styles');
