@@ -260,6 +260,28 @@ const template = (inputProfile: CreatorProfile): string => {
     overflow-x:hidden;
     line-height:1.6;
   }
+  body.is-loading{overflow:hidden}
+  .site-loader{
+    position:fixed;inset:0;z-index:1000;display:grid;place-items:center;
+    overflow:hidden;background:radial-gradient(circle at 50% 42%,#26322d 0%,var(--green) 42%,var(--green-deep) 100%);
+    transition:opacity .55s ease,visibility .55s ease;
+  }
+  .site-loader::before,.site-loader::after{
+    content:'';position:absolute;width:min(72vw,640px);aspect-ratio:1;border:1px solid rgba(234,145,87,.22);border-radius:50%;
+  }
+  .site-loader::before{animation:loader-orbit 3.2s linear infinite}
+  .site-loader::after{width:min(53vw,460px);border-style:dashed;border-color:rgba(241,229,215,.2);animation:loader-orbit 5s linear infinite reverse}
+  .site-loader-inner{position:relative;z-index:1;display:grid;justify-items:center;gap:18px}
+  .site-loader-mask{
+    width:clamp(118px,18vw,190px);height:clamp(168px,25vw,270px);object-fit:cover;object-position:center;
+    border-radius:48% 48% 44% 44%;filter:drop-shadow(0 18px 26px rgba(0,0,0,.52));
+    animation:loader-mask-spin 2.8s cubic-bezier(.45,.05,.55,.95) infinite;
+  }
+  .site-loader-label{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--cream-soft)}
+  .site-loader.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
+  @keyframes loader-orbit{to{transform:rotate(360deg)}}
+  @keyframes loader-mask-spin{from{transform:rotate(0deg) scale(.94)}50%{transform:rotate(180deg) scale(1)}to{transform:rotate(360deg) scale(.94)}}
+  @media(prefers-reduced-motion:reduce){.site-loader::before,.site-loader::after,.site-loader-mask{animation:none}}
   ::selection{background:var(--terra);color:var(--cream)}
   ::-webkit-scrollbar{width:11px}
   ::-webkit-scrollbar-track{background:var(--green-deep)}
@@ -700,7 +722,14 @@ const template = (inputProfile: CreatorProfile): string => {
   footer a{color:var(--terra-light);text-decoration:none}
 </style>
 </head>
-<body>
+<body class="is-loading">
+
+<div class="site-loader" id="siteLoader" role="status" aria-label="Cargando Kitsune Tattoo">
+  <div class="site-loader-inner">
+    <img class="site-loader-mask" src="assets/brand/kitsune-loader-mask.jpg" alt="" aria-hidden="true">
+    <span class="site-loader-label">Abriendo la guarida</span>
+  </div>
+</div>
 
 <nav id="nav">
   <a class="nav-logo" href="#top">${cleanText(profile.displayName)}</a>
@@ -856,6 +885,19 @@ ${artistPortfolioMarkup()}
 </footer>
 
 <script>
+  const siteLoader = document.getElementById('siteLoader');
+  let loaderDismissed = false;
+  const dismissLoader = () => {
+    if (loaderDismissed || !siteLoader) return;
+    loaderDismissed = true;
+    siteLoader.classList.add('is-leaving');
+    document.body.classList.remove('is-loading');
+    setTimeout(() => siteLoader.remove(), 650);
+  };
+  // Wait for the initial render but never trap visitors on a slow connection.
+  addEventListener('load', () => setTimeout(dismissLoader, 450), { once:true });
+  setTimeout(dismissLoader, 4000);
+
   const nav = document.getElementById('nav');
   const navToggle = document.getElementById('navToggle');
   if (navToggle) {
