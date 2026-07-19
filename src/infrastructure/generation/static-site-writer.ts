@@ -972,9 +972,29 @@ const template = (inputProfile: CreatorProfile): string => {
       current.textContent = String(Math.max(1, position)).padStart(2, '0');
     };
     const move = (direction) => track.scrollBy({ left: direction * track.clientWidth * .86, behavior: 'smooth' });
-    previous?.addEventListener('click', () => move(-1));
-    next?.addEventListener('click', () => move(1));
+    let paused = false;
+    let visible = false;
+    let manualPauseUntil = 0;
+    const pauseForInteraction = () => { manualPauseUntil = Date.now() + 6000; };
+    const advance = () => {
+      if (paused || !visible || Date.now() < manualPauseUntil) return;
+      const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
+      if (atEnd) {
+        track.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        move(1);
+      }
+    };
+    previous?.addEventListener('click', () => { pauseForInteraction(); move(-1); });
+    next?.addEventListener('click', () => { pauseForInteraction(); move(1); });
     track.addEventListener('scroll', updatePosition, { passive:true });
+    carousel.addEventListener('mouseenter', () => { paused = true; });
+    carousel.addEventListener('mouseleave', () => { paused = false; });
+    carousel.addEventListener('focusin', () => { paused = true; });
+    carousel.addEventListener('focusout', () => { paused = false; });
+    track.addEventListener('pointerdown', pauseForInteraction, { passive:true });
+    new IntersectionObserver((entries) => { visible = entries[0]?.isIntersecting ?? false; }, { threshold:.25 }).observe(carousel);
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) setInterval(advance, 3200);
     updatePosition();
   });
 
