@@ -727,7 +727,6 @@ const template = (inputProfile: CreatorProfile): string => {
 <div class="site-loader" id="siteLoader" role="status" aria-label="Cargando Kitsune Tattoo">
   <div class="site-loader-inner">
     <img class="site-loader-mask" src="assets/brand/kitsune-loader-mask.jpg" alt="" aria-hidden="true">
-    <span class="site-loader-label">Abriendo la guarida</span>
   </div>
 </div>
 
