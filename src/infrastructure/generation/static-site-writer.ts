@@ -267,7 +267,7 @@ const template = (inputProfile: CreatorProfile): string => {
   .site-loader::after{width:min(53vw,460px);border-style:dashed;border-color:rgba(241,229,215,.2);animation:loader-orbit 5s linear infinite reverse}
   .site-loader-inner{position:relative;z-index:1;display:grid;justify-items:center;gap:18px}
   .site-loader-mask{
-    width:clamp(142px,22vw,238px);aspect-ratio:1;object-fit:cover;object-position:center 42%;
+    width:clamp(190px,29vw,310px);aspect-ratio:1;object-fit:contain;object-position:center;
     border-radius:50%;clip-path:circle(50%);mix-blend-mode:screen;filter:drop-shadow(0 18px 26px rgba(0,0,0,.42));
     animation:loader-mask-spin 2.8s cubic-bezier(.45,.05,.55,.95) infinite;
   }
@@ -462,8 +462,8 @@ const template = (inputProfile: CreatorProfile): string => {
   .ig-btn.soft{background:#e3dcc4;color:var(--green)}
   .ig-btn.soft:hover{background:#d8d0b4}
   .ig-mini{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:22px;border-radius:14px;overflow:hidden}
-  .ig-mini img{width:100%;aspect-ratio:1;object-fit:cover;display:block;transition:transform .35s}
-  .ig-mini img:hover{transform:scale(1.07)}
+  .ig-mini img{width:100%;aspect-ratio:1;object-fit:cover;display:block;transform:translate3d(0,var(--parallax-y,0px),0) scale(1.04);transition:transform .35s}
+  .ig-mini img:hover{transform:translate3d(0,var(--parallax-y,0px),0) scale(1.09)}
   .ig-below{text-align:center;margin-top:56px}
   .ig-below h2{font-size:clamp(1.8rem,4vw,2.8rem);max-width:760px;margin:0 auto}
   .ig-below h2 em{font-style:normal;color:var(--terra-light)}
@@ -489,7 +489,7 @@ const template = (inputProfile: CreatorProfile): string => {
   .about-parallax-frame::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,13,12,.05),rgba(10,13,12,.48))}
   .about-parallax-frame img{
     position:absolute;top:-9%;left:0;width:100%;height:118%;object-fit:cover;
-    transform:translate3d(0,0,0) scale(1.04);will-change:transform;
+    transform:translate3d(0,var(--parallax-y,0px),0) scale(1.04);will-change:transform;
   }
   .about-parallax-label{
     position:absolute;right:18px;bottom:14px;z-index:1;color:var(--cream);font-size:.67rem;
@@ -534,8 +534,8 @@ const template = (inputProfile: CreatorProfile): string => {
   .styles-cards .brew-grid{grid-template-columns:repeat(3,1fr);max-width:1100px}
   .styles-cards .brew-card{min-height:350px;padding:0;isolation:isolate;border:1px solid rgba(241,229,215,.2);background:#18251c;box-shadow:0 18px 42px rgba(0,0,0,.28)}
   .styles-cards .brew-card::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(7,13,9,.05) 12%,rgba(7,13,9,.2) 42%,rgba(7,13,9,.9) 100%);pointer-events:none;transition:opacity .45s ease}
-  .styles-cards .style-card-image{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.07) contrast(1.04);transition:transform .7s cubic-bezier(.2,.7,.2,1),filter .7s ease}
-  .styles-cards .brew-card:hover .style-card-image{transform:scale(1.075);filter:saturate(1.16) contrast(1.08)}
+  .styles-cards .style-card-image{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;transform:translate3d(0,var(--parallax-y,0px),0) scale(1.04);filter:saturate(1.07) contrast(1.04);transition:transform .7s cubic-bezier(.2,.7,.2,1),filter .7s ease}
+  .styles-cards .brew-card:hover .style-card-image{transform:translate3d(0,var(--parallax-y,0px),0) scale(1.095);filter:saturate(1.16) contrast(1.08)}
   .styles-cards .style-card-content{position:absolute;inset:auto 0 0;padding:26px 26px 24px;color:var(--cream)}
   .styles-cards .style-card-eyebrow{position:absolute;z-index:2;left:26px;bottom:141px;color:#f1c39d;font-size:.68rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;transition:opacity .32s ease}
   .styles-cards .brew-card h3{position:absolute;z-index:2;left:18px;right:18px;bottom:91px;margin-bottom:8px;padding:10px 12px;font-size:clamp(1.6rem,2.1vw,2rem);line-height:.95;color:var(--cream);background:rgba(7,13,9,.68);border:1px solid rgba(241,229,215,.16);border-radius:12px;backdrop-filter:blur(10px);text-shadow:0 2px 12px rgba(0,0,0,.7);transition:opacity .32s ease}
@@ -594,7 +594,7 @@ const template = (inputProfile: CreatorProfile): string => {
   .artist-video span{position:absolute;left:11px;bottom:10px;padding:5px 8px;border-radius:999px;background:rgba(0,0,0,.65);font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.86;transition:opacity .2s ease}
   .artist-video:hover span{opacity:0}
   .artist-identity-media{position:relative;overflow:visible;margin:26px 0 22px;height:238px;border-radius:16px}
-  .artist-identity-media>img{width:100%;height:100%;object-fit:cover;object-position:center 40%;border-radius:16px;display:block;filter:saturate(.92) contrast(1.04)}
+  .artist-identity-media>img{width:100%;height:100%;object-fit:cover;object-position:center 40%;border-radius:16px;clip-path:inset(0 round 16px);display:block;transform:translate3d(0,var(--parallax-y,0px),0) scale(1.04);will-change:transform;filter:saturate(.92) contrast(1.04)}
   .artist-video-float{position:absolute;z-index:3;right:14px;bottom:-18px;width:64px;height:64px;aspect-ratio:auto;margin:0;border-radius:50%;box-shadow:0 10px 22px rgba(0,0,0,.45);transition:width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1),border-radius .35s ease,box-shadow .35s ease}
   .artist-video-float:hover{width:176px;height:234px;border-radius:14px;box-shadow:0 22px 42px rgba(0,0,0,.5)}
   .artist-video-float video{transition:transform .45s ease}
@@ -622,9 +622,9 @@ const template = (inputProfile: CreatorProfile): string => {
   .artist-carousel-track::-webkit-scrollbar{display:none}
   .artist-work{position:relative;flex:0 0:min(42vw,430px);aspect-ratio:4/5;margin:0;padding:0;overflow:hidden;scroll-snap-align:start;border:1px solid rgba(241,229,215,.14);border-radius:20px;background:#1c1f22;cursor:zoom-in;isolation:isolate}
   .artist-work::after{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 48%,rgba(0,0,0,.68) 100%);pointer-events:none;transition:opacity .3s ease}
-  .artist-work img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .55s cubic-bezier(.2,.75,.2,1),filter .35s ease}
+  .artist-work img{width:100%;height:100%;object-fit:cover;display:block;transform:translate3d(0,var(--parallax-y,0px),0) scale(1.04);transition:transform .55s cubic-bezier(.2,.75,.2,1),filter .35s ease}
   .artist-work-expand{position:absolute;z-index:2;bottom:16px;left:18px;color:var(--cream);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:0;transform:translateY(8px);transition:opacity .25s ease,transform .25s ease}
-  .artist-work:hover img,.artist-work:focus-visible img{transform:scale(1.055);filter:saturate(1.08)}
+  .artist-work:hover img,.artist-work:focus-visible img{transform:translate3d(0,var(--parallax-y,0px),0) scale(1.075);filter:saturate(1.08)}
   .artist-work:hover .artist-work-expand,.artist-work:focus-visible .artist-work-expand{opacity:1;transform:translateY(0)}
   .artist-work:focus-visible{outline:2px solid var(--terra-light);outline-offset:3px}
   .artist-carousel-control{position:absolute;z-index:3;top:calc(50% - 30px);width:48px;height:48px;border:1px solid rgba(241,229,215,.28);border-radius:50%;background:rgba(10,13,12,.72);backdrop-filter:blur(10px);color:var(--cream);font-size:1.5rem;line-height:1;cursor:pointer;transition:background .2s ease,transform .2s ease}
@@ -688,7 +688,7 @@ const template = (inputProfile: CreatorProfile): string => {
   }
   .team-card:hover{transform:translateY(-6px);box-shadow:0 20px 44px rgba(0,0,0,.4)}
   .team-card .ph{aspect-ratio:4/5;border-radius:16px;overflow:hidden;margin-bottom:14px;background:#141d17}
-  .team-card .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .team-card .ph img{width:100%;height:100%;object-fit:cover;display:block;transform:translate3d(0,var(--parallax-y,0px),0) scale(1.04);will-change:transform}
   .team-card h3{font-size:1.25rem;margin-bottom:2px}
   .team-role{font-size:.85rem;opacity:.75}
   .team-tune{
@@ -726,7 +726,7 @@ const template = (inputProfile: CreatorProfile): string => {
     background:#fdfbf4;border-radius:22px;overflow:hidden;
     border:1px solid rgba(23,21,17,.08);box-shadow:0 18px 40px rgba(38,55,44,.16);
   }
-  .gallery-item img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+  .gallery-item img{width:100%;aspect-ratio:1;object-fit:cover;display:block;transform:translate3d(0,var(--parallax-y,0px),0) scale(1.04);will-change:transform}
   .gallery-item figcaption{padding:16px 16px 18px;color:#4b4036;font-size:.92rem}
 
   .contact{background:linear-gradient(180deg,var(--green) 0%,var(--green-deep) 100%)}
@@ -1050,33 +1050,36 @@ const template = (inputProfile: CreatorProfile): string => {
     processVideo.addEventListener('ended', () => processVideoShell.classList.remove('playing'));
   }
 
-  const aboutParallaxItems = Array.from(document.querySelectorAll('[data-about-parallax]'))
-    .map((frame) => ({
-      frame,
-      image: frame.querySelector('[data-about-parallax-image]'),
-      depth: Number.parseFloat(frame.getAttribute('data-parallax-depth') || '1')
-    }))
+  const parallaxImages = Array.from(document.querySelectorAll('.about-parallax-frame img, .styles-cards .style-card-image, .artist-identity-media > img, .artist-work img, .gallery-item img, .team-card .ph img, .ig-mini img'))
+    .map((image) => {
+      const frame = image.closest('[data-about-parallax], .brew-card, .artist-identity-media, .artist-work, .gallery-item, .team-card .ph, .ig-mini');
+      return {
+        frame,
+        image,
+        depth: Number.parseFloat(frame?.getAttribute('data-parallax-depth') || '.62')
+      };
+    })
     .filter((item) => item.frame instanceof HTMLElement && item.image instanceof HTMLImageElement);
-  if (aboutParallaxItems.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    let aboutParallaxQueued = false;
-    const updateAboutParallax = () => {
-      aboutParallaxItems.forEach((item) => {
+  if (parallaxImages.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let parallaxQueued = false;
+    const updateImageParallax = () => {
+      parallaxImages.forEach((item) => {
         if (!(item.frame instanceof HTMLElement) || !(item.image instanceof HTMLImageElement)) return;
         const rect = item.frame.getBoundingClientRect();
         const progress = Math.min(Math.max((innerHeight - rect.top) / (innerHeight + rect.height), 0), 1);
         const offset = (progress - .5) * -76 * item.depth;
-        item.image.style.transform = 'translate3d(0, ' + offset + 'px, 0) scale(1.04)';
+        item.image.style.setProperty('--parallax-y', offset + 'px');
       });
-      aboutParallaxQueued = false;
+      parallaxQueued = false;
     };
-    const queueAboutParallax = () => {
-      if (aboutParallaxQueued) return;
-      aboutParallaxQueued = true;
-      requestAnimationFrame(updateAboutParallax);
+    const queueImageParallax = () => {
+      if (parallaxQueued) return;
+      parallaxQueued = true;
+      requestAnimationFrame(updateImageParallax);
     };
-    addEventListener('scroll', queueAboutParallax, { passive:true });
-    addEventListener('resize', queueAboutParallax, { passive:true });
-    queueAboutParallax();
+    addEventListener('scroll', queueImageParallax, { passive:true });
+    addEventListener('resize', queueImageParallax, { passive:true });
+    queueImageParallax();
   }
 
   const heroScrollVideo = document.getElementById('heroScrollVideo');
