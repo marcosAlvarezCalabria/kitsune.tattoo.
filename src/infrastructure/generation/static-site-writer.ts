@@ -267,8 +267,8 @@ const template = (inputProfile: CreatorProfile): string => {
   .site-loader::after{width:min(53vw,460px);border-style:dashed;border-color:rgba(241,229,215,.2);animation:loader-orbit 5s linear infinite reverse}
   .site-loader-inner{position:relative;z-index:1;display:grid;justify-items:center;gap:18px}
   .site-loader-mask{
-    width:clamp(118px,18vw,190px);height:clamp(168px,25vw,270px);object-fit:cover;object-position:center;
-    border-radius:48% 48% 44% 44%;filter:drop-shadow(0 18px 26px rgba(0,0,0,.52));
+    width:clamp(142px,22vw,238px);aspect-ratio:1;object-fit:cover;object-position:center 42%;
+    border-radius:50%;clip-path:circle(50%);mix-blend-mode:screen;filter:drop-shadow(0 18px 26px rgba(0,0,0,.42));
     animation:loader-mask-spin 2.8s cubic-bezier(.45,.05,.55,.95) infinite;
   }
   .site-loader-label{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--cream-soft)}
