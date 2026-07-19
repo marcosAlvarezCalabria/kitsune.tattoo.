@@ -194,8 +194,13 @@ const artistPortfolioMarkup = (): string =>
               <h2 class="sec-title" data-brush-write>El universo de ${cleanText(member.name)}</h2>
               <p>${cleanText(member.style)}</p>
             </div>
-            <div class="artist-work-grid stagger">
-              ${images.slice(0, 6).map((imagePath, index) => `<figure class="artist-work"><img src="${escapeHtml(imagePath)}" alt="Trabajo de ${cleanText(member.name)} ${index + 1}" loading="lazy"></figure>`).join("")}
+            <div class="artist-carousel reveal" data-artist-carousel aria-label="Carrusel de trabajos de ${cleanText(member.name)}">
+              <button class="artist-carousel-control artist-carousel-prev" type="button" aria-label="Ver trabajo anterior">←</button>
+              <div class="artist-carousel-track" tabindex="0">
+                ${images.slice(0, 6).map((imagePath, index) => `<button class="artist-work" type="button" data-lightbox-image="${escapeHtml(imagePath)}" data-lightbox-alt="Trabajo de ${cleanText(member.name)} ${index + 1}" aria-label="Abrir trabajo ${index + 1} de ${cleanText(member.name)}"><img src="${escapeHtml(imagePath)}" alt="Trabajo de ${cleanText(member.name)} ${index + 1}" loading="lazy"><span class="artist-work-expand">Ver pieza</span></button>`).join("")}
+              </div>
+              <button class="artist-carousel-control artist-carousel-next" type="button" aria-label="Ver siguiente trabajo">→</button>
+              <div class="artist-carousel-status" aria-live="polite"><span>01</span> / ${String(Math.min(images.length, 6)).padStart(2, "0")}</div>
             </div>
             <div class="artist-portfolio-action reveal"><button class="portfolio-open" type="button" data-portfolio-open="${dialogId}">Ver portfolio completo <span>${images.length} piezas</span></button></div>
           </div>
@@ -612,15 +617,21 @@ const template = (inputProfile: CreatorProfile): string => {
   [data-brush-write].is-writing .brush-letter{animation:brush-letter .42s cubic-bezier(.2,.75,.2,1) forwards;animation-delay:calc(var(--brush-index) * 35ms)}
   @keyframes brush-letter{0%{opacity:0;transform:translate(-5px,6px) rotate(-3deg);filter:blur(3px)}60%{opacity:1;transform:translate(2px,-1px) rotate(1deg);filter:blur(0)}100%{opacity:1;transform:none;filter:none}}
   @media(prefers-reduced-motion:reduce){[data-brush-write] .brush-letter{opacity:1;transform:none;filter:none}[data-brush-write].is-writing .brush-letter{animation:none}}
-  .artist-work-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-  .artist-work{margin:0;overflow:hidden;border-radius:14px;background:#1c1f22;border:1px solid rgba(241,229,215,.1)}
-  .artist-work:nth-child(5n+1){grid-column:span 5;grid-row:span 2}
-  .artist-work:nth-child(5n+2){grid-column:span 4}
-  .artist-work:nth-child(5n+3){grid-column:span 3}
-  .artist-work:nth-child(5n+4){grid-column:span 3}
-  .artist-work:nth-child(5n){grid-column:span 4}
-  .artist-work img{width:100%;height:100%;min-height:220px;aspect-ratio:1;object-fit:cover;display:block;transition:transform .45s ease}
-  .artist-work:hover img{transform:scale(1.045)}
+  .artist-carousel{position:relative;padding:0 48px 34px}
+  .artist-carousel-track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;padding:2px 0 18px}
+  .artist-carousel-track::-webkit-scrollbar{display:none}
+  .artist-work{position:relative;flex:0 0:min(42vw,430px);aspect-ratio:4/5;margin:0;padding:0;overflow:hidden;scroll-snap-align:start;border:1px solid rgba(241,229,215,.14);border-radius:20px;background:#1c1f22;cursor:zoom-in;isolation:isolate}
+  .artist-work::after{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 48%,rgba(0,0,0,.68) 100%);pointer-events:none;transition:opacity .3s ease}
+  .artist-work img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .55s cubic-bezier(.2,.75,.2,1),filter .35s ease}
+  .artist-work-expand{position:absolute;z-index:2;bottom:16px;left:18px;color:var(--cream);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:0;transform:translateY(8px);transition:opacity .25s ease,transform .25s ease}
+  .artist-work:hover img,.artist-work:focus-visible img{transform:scale(1.055);filter:saturate(1.08)}
+  .artist-work:hover .artist-work-expand,.artist-work:focus-visible .artist-work-expand{opacity:1;transform:translateY(0)}
+  .artist-work:focus-visible{outline:2px solid var(--terra-light);outline-offset:3px}
+  .artist-carousel-control{position:absolute;z-index:3;top:calc(50% - 30px);width:48px;height:48px;border:1px solid rgba(241,229,215,.28);border-radius:50%;background:rgba(10,13,12,.72);backdrop-filter:blur(10px);color:var(--cream);font-size:1.5rem;line-height:1;cursor:pointer;transition:background .2s ease,transform .2s ease}
+  .artist-carousel-control:hover{background:var(--terra);transform:scale(1.08)}
+  .artist-carousel-prev{left:0}.artist-carousel-next{right:0}
+  .artist-carousel-status{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:.7rem;font-weight:700;letter-spacing:.13em;color:rgba(241,229,215,.62)}
+  .artist-carousel-status span{color:var(--terra-light)}
   .artist-portfolio-action{text-align:center;margin-top:34px}
   .portfolio-open{cursor:pointer;border:1px solid rgba(241,229,215,.45);color:var(--cream);background:transparent;border-radius:999px;padding:13px 20px;font:600 .92rem 'Outfit',sans-serif;transition:background .25s ease,transform .25s ease}
   .portfolio-open span{color:#f1c39d;margin-left:7px;font-size:.78rem}
@@ -635,8 +646,12 @@ const template = (inputProfile: CreatorProfile): string => {
   .portfolio-dialog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
   .portfolio-dialog-grid figure{margin:0;border-radius:12px;overflow:hidden;background:#222}
   .portfolio-dialog-grid img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+  .artwork-lightbox{width:min(920px,calc(100vw - 28px));max-height:calc(100svh - 28px);padding:0;border:1px solid rgba(241,229,215,.2);border-radius:22px;overflow:hidden;background:#090a09;box-shadow:0 30px 100px rgba(0,0,0,.8)}
+  .artwork-lightbox::backdrop{background:rgba(0,0,0,.86);backdrop-filter:blur(9px)}
+  .artwork-lightbox img{display:block;width:100%;max-height:calc(100svh - 28px);object-fit:contain}
+  .artwork-lightbox-close{position:absolute;z-index:1;top:15px;right:15px;border:1px solid rgba(241,229,215,.38);border-radius:999px;padding:9px 13px;background:rgba(10,13,12,.76);color:var(--cream);font:inherit;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
   @media(max-width:700px){.portfolio-dialog-shell{padding:16px}.portfolio-dialog-grid{grid-template-columns:repeat(2,1fr);gap:7px}.portfolio-dialog-head h2{font-size:2rem}}
-  @media(max-width:760px){.artist-portfolio{padding:78px 0}.artist-work-grid{grid-template-columns:repeat(2,1fr);gap:8px}.artist-work,.artist-work:nth-child(n){grid-column:span 1;grid-row:auto}.artist-work img{min-height:0;aspect-ratio:1}}
+  @media(max-width:760px){.artist-portfolio{padding:78px 0}.artist-carousel{padding:0 0 32px}.artist-carousel-track{gap:12px;padding-left:5vw;padding-right:5vw}.artist-work{flex-basis:78vw;border-radius:16px}.artist-carousel-control{display:none}.artist-work-expand{opacity:1;transform:none}.artist-carousel-status{bottom:0}.artwork-lightbox{border-radius:16px}}
 
   .process{background:var(--cream);color:var(--ink);padding:110px 0}
   .process-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.62fr);gap:70px;align-items:center;max-width:1020px;margin:0 auto}
@@ -825,6 +840,11 @@ const template = (inputProfile: CreatorProfile): string => {
 
 ${artistPortfolioMarkup()}
 
+<dialog class="artwork-lightbox" id="artworkLightbox" aria-label="Vista ampliada del tatuaje">
+  <button class="artwork-lightbox-close" type="button" aria-label="Cerrar imagen">Cerrar</button>
+  <img id="artworkLightboxImage" src="" alt="">
+</dialog>
+
 <section class="process" id="process">
   <div class="wrap process-grid">
     <div class="process-copy reveal">
@@ -949,6 +969,44 @@ ${artistPortfolioMarkup()}
       if (event.target === dialog) dialog.close();
     });
   });
+
+  document.querySelectorAll('[data-artist-carousel]').forEach((carousel) => {
+    const track = carousel.querySelector('.artist-carousel-track');
+    const previous = carousel.querySelector('.artist-carousel-prev');
+    const next = carousel.querySelector('.artist-carousel-next');
+    const current = carousel.querySelector('.artist-carousel-status span');
+    if (!(track instanceof HTMLElement)) return;
+
+    const updatePosition = () => {
+      const firstCard = track.querySelector('.artist-work');
+      if (!(firstCard instanceof HTMLElement) || !(current instanceof HTMLElement)) return;
+      const gap = Number.parseFloat(getComputedStyle(track).gap) || 0;
+      const position = Math.round(track.scrollLeft / (firstCard.offsetWidth + gap)) + 1;
+      current.textContent = String(Math.max(1, position)).padStart(2, '0');
+    };
+    const move = (direction) => track.scrollBy({ left: direction * track.clientWidth * .86, behavior: 'smooth' });
+    previous?.addEventListener('click', () => move(-1));
+    next?.addEventListener('click', () => move(1));
+    track.addEventListener('scroll', updatePosition, { passive:true });
+    updatePosition();
+  });
+
+  const artworkLightbox = document.getElementById('artworkLightbox');
+  const artworkLightboxImage = document.getElementById('artworkLightboxImage');
+  document.querySelectorAll('[data-lightbox-image]').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!(artworkLightbox instanceof HTMLDialogElement) || !(artworkLightboxImage instanceof HTMLImageElement)) return;
+      artworkLightboxImage.src = button.dataset.lightboxImage || '';
+      artworkLightboxImage.alt = button.dataset.lightboxAlt || 'Tatuaje de Kitsune Tattoo';
+      artworkLightbox.showModal();
+    });
+  });
+  if (artworkLightbox instanceof HTMLDialogElement) {
+    artworkLightbox.querySelector('.artwork-lightbox-close')?.addEventListener('click', () => artworkLightbox.close());
+    artworkLightbox.addEventListener('click', (event) => {
+      if (event.target === artworkLightbox) artworkLightbox.close();
+    });
+  }
 
   document.querySelectorAll('[data-hover-video]').forEach((container) => {
     const video = container.querySelector('video');
