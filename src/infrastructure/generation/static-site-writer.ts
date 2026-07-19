@@ -488,8 +488,10 @@ const template = (inputProfile: CreatorProfile): string => {
   .brew{background:var(--green-deep);position:relative;overflow:hidden}
   .style-showcase{height:350svh;background:#111;overflow:visible}
   .styles-sticky{position:sticky;top:0;height:100svh;min-height:700px;overflow:hidden}
-  .styles-media,.styles-scroll-video,.styles-scrim{position:absolute;inset:0;width:100%;height:100%}
-  .styles-scroll-video{object-fit:cover;display:block;background:#111}
+  .styles-media,.styles-video-poster,.styles-scroll-video,.styles-scrim{position:absolute;inset:0;width:100%;height:100%}
+  .styles-video-poster{object-fit:cover;display:block}
+  .styles-scroll-video{z-index:1;object-fit:cover;display:block;background:#111;opacity:0;transition:opacity .22s ease}
+  .styles-scroll-video.is-ready{opacity:1}
   .styles-scrim{background:linear-gradient(180deg,rgba(5,8,7,.44),rgba(5,8,7,.64));z-index:1}
   .styles-video-copy{position:absolute;z-index:2;left:5vw;top:50%;transform:translateY(-50%);max-width:560px;color:var(--cream);pointer-events:none}
   .styles-video-copy span{display:block;font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#f1c39d;margin-bottom:11px}
@@ -793,7 +795,7 @@ const template = (inputProfile: CreatorProfile): string => {
 
 <section class="brew style-showcase" id="styles">
   <div class="styles-sticky">
-    <div class="styles-media"><video class="styles-scroll-video" id="stylesScrollVideo" muted playsinline preload="auto" poster="${escapeHtml(STYLE_SHOWCASE_VIDEO.posterPath)}" aria-label="Ambiente del estudio"><source src="${escapeHtml(STYLE_SHOWCASE_VIDEO.videoPath)}" type="video/mp4"></video></div>
+    <div class="styles-media"><img class="styles-video-poster" src="${escapeHtml(STYLE_SHOWCASE_VIDEO.posterPath)}" alt="Ambiente del estudio"><video class="styles-scroll-video" id="stylesScrollVideo" muted playsinline webkit-playsinline preload="auto" poster="${escapeHtml(STYLE_SHOWCASE_VIDEO.posterPath)}" aria-label="Ambiente del estudio"><source src="${escapeHtml(STYLE_SHOWCASE_VIDEO.videoPath)}" type="video/mp4"></video></div>
     <div class="styles-scrim"></div>
     <div class="styles-video-copy"><span>Kitsune Tattoo</span><h2>Un estilo para cada piel.</h2><p>No hacemos de todo: dominamos lo nuestro y lo llevamos al limite.</p></div>
   </div>
@@ -1118,6 +1120,26 @@ const template = (inputProfile: CreatorProfile): string => {
 
   const stylesScrollVideo = document.getElementById('stylesScrollVideo');
   const stylesSection = document.getElementById('styles');
+  if (stylesScrollVideo instanceof HTMLVideoElement) {
+    const prepareStyleVideo = () => {
+      stylesScrollVideo.load();
+      // Muted inline playback is permitted on iPhone and forces Safari to decode a first frame.
+      stylesScrollVideo.play().then(() => stylesScrollVideo.pause()).catch(() => undefined);
+    };
+    stylesScrollVideo.addEventListener('loadeddata', () => {
+      stylesScrollVideo.pause();
+      stylesScrollVideo.classList.add('is-ready');
+    }, { once:true });
+    if (stylesSection) {
+      new IntersectionObserver((entries, observer) => {
+        if (!entries[0]?.isIntersecting) return;
+        prepareStyleVideo();
+        observer.disconnect();
+      }, { rootMargin:'150% 0px' }).observe(stylesSection);
+    } else {
+      prepareStyleVideo();
+    }
+  }
   let styleTargetProgress = 0;
   let styleCurrentProgress = 0;
   function updateStyleProgress() {
