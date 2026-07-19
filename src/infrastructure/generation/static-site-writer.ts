@@ -973,11 +973,10 @@ const template = (inputProfile: CreatorProfile): string => {
     };
     const move = (direction) => track.scrollBy({ left: direction * track.clientWidth * .86, behavior: 'smooth' });
     let paused = false;
-    let visible = false;
     let manualPauseUntil = 0;
     const pauseForInteraction = () => { manualPauseUntil = Date.now() + 6000; };
     const advance = () => {
-      if (paused || !visible || Date.now() < manualPauseUntil) return;
+      if (paused || Date.now() < manualPauseUntil) return;
       const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
       if (atEnd) {
         track.scrollTo({ left: 0, behavior: 'smooth' });
@@ -993,8 +992,8 @@ const template = (inputProfile: CreatorProfile): string => {
     carousel.addEventListener('focusin', () => { paused = true; });
     carousel.addEventListener('focusout', () => { paused = false; });
     track.addEventListener('pointerdown', pauseForInteraction, { passive:true });
-    new IntersectionObserver((entries) => { visible = entries[0]?.isIntersecting ?? false; }, { threshold:.25 }).observe(carousel);
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) setInterval(advance, 3200);
+    setTimeout(advance, 900);
+    setInterval(advance, 1800);
     updatePosition();
   });
 
