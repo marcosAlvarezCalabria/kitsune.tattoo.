@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+assets/generated/
+kitsune-tattoo-netlify.zip
+*.log
