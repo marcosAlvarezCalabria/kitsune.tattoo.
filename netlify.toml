@@ -1,0 +1,10 @@
+[build]
+  # El sitio no es HTML estático ya presente en el repo: se genera con el
+  # script `generate`, que produce la carpeta `dist/`. Sin este comando y sin
+  # `publish`, Netlify no encuentra ningún index.html y devuelve "Page not found".
+  command = "npx playwright install chromium && npm run generate -- @kitsune.tattoo"
+  publish = "dist"
+
+[build.environment]
+  # Igual que el entorno local donde la generación funciona.
+  NODE_VERSION = "24"
