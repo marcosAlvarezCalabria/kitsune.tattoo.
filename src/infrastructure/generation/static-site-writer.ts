@@ -202,16 +202,16 @@ const staffMarkup = (): string =>
     }
   ).join("");
 
-const aboutParallaxMarkup = (posts: readonly PortfolioPost[], fallbackImage: string): string => {
-  const image = posts[0];
-  const imagePath = image?.localPath ?? fallbackImage;
-  const imageAlt = image ? cleanText(image.caption) : "Trabajo de Kitsune Tattoo";
-
-  return `<div class="about-parallax-frame" data-about-parallax>
-    <img src="${escapeHtml(imagePath)}" alt="${imageAlt}" loading="lazy" data-about-parallax-image>
-    <span class="about-parallax-label">Kitsune Tattoo · Leganes</span>
+const aboutParallaxMarkup = (): string =>
+  `<div class="about-parallax-stack">
+    <figure class="about-parallax-frame about-parallax-front" data-about-parallax data-parallax-depth="1">
+      <img src="assets/about/kitsune-studio-front.png" alt="Fachada de Kitsune Tattoo en Leganes" loading="lazy" data-about-parallax-image>
+      <figcaption class="about-parallax-label">Kitsune Tattoo · Leganes</figcaption>
+    </figure>
+    <figure class="about-parallax-frame about-parallax-corner" data-about-parallax data-parallax-depth=".62">
+      <img src="assets/about/kitsune-studio-corner.png" alt="Entrada de Kitsune Tattoo" loading="lazy" data-about-parallax-image>
+    </figure>
   </div>`;
-};
 
 const template = (inputProfile: CreatorProfile): string => {
   const profile = normalizeProfile(inputProfile);
@@ -479,10 +479,13 @@ const template = (inputProfile: CreatorProfile): string => {
     background:rgba(241,229,215,.1);border:1px solid rgba(241,229,215,.25);
     padding:8px 18px;border-radius:999px;font-size:.88rem;font-weight:500;
   }
+  .about-parallax-stack{position:relative;min-height:570px}
   .about-parallax-frame{
-    position:relative;min-height:540px;overflow:hidden;border-radius:22px;
+    position:absolute;overflow:hidden;border-radius:22px;
     background:var(--green-deep);box-shadow:0 20px 48px rgba(0,0,0,.36);
   }
+  .about-parallax-front{top:0;right:0;width:90%;height:468px}
+  .about-parallax-corner{bottom:0;left:0;z-index:2;width:55%;height:275px;border:5px solid var(--green)}
   .about-parallax-frame::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,13,12,.05),rgba(10,13,12,.48))}
   .about-parallax-frame img{
     position:absolute;top:-9%;left:0;width:100%;height:118%;object-fit:cover;
@@ -492,7 +495,11 @@ const template = (inputProfile: CreatorProfile): string => {
     position:absolute;right:18px;bottom:14px;z-index:1;color:var(--cream);font-size:.67rem;
     font-weight:700;letter-spacing:.16em;text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,.7);
   }
-  @media(max-width:860px){.about-parallax-frame{min-height:420px;max-width:560px}}
+  @media(max-width:860px){
+    .about-parallax-stack{min-height:500px;max-width:560px}
+    .about-parallax-front{width:100%;height:405px}
+    .about-parallax-corner{width:58%;height:220px}
+  }
   @media(prefers-reduced-motion:reduce){.about-parallax-frame img{transform:scale(1.04)!important}}
 
   .brew{background:var(--green-deep);position:relative;overflow:hidden}
@@ -795,7 +802,7 @@ const template = (inputProfile: CreatorProfile): string => {
       </div>
     </div>
     <div class="about-parallax reveal">
-      ${aboutParallaxMarkup(profile.portfolioPosts, profile.profileImage.localPath)}
+      ${aboutParallaxMarkup()}
     </div>
   </div>
 </section>
@@ -1043,15 +1050,23 @@ const template = (inputProfile: CreatorProfile): string => {
     processVideo.addEventListener('ended', () => processVideoShell.classList.remove('playing'));
   }
 
-  const aboutParallax = document.querySelector('[data-about-parallax]');
-  const aboutParallaxImage = document.querySelector('[data-about-parallax-image]');
-  if (aboutParallax instanceof HTMLElement && aboutParallaxImage instanceof HTMLImageElement && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const aboutParallaxItems = Array.from(document.querySelectorAll('[data-about-parallax]'))
+    .map((frame) => ({
+      frame,
+      image: frame.querySelector('[data-about-parallax-image]'),
+      depth: Number.parseFloat(frame.getAttribute('data-parallax-depth') || '1')
+    }))
+    .filter((item) => item.frame instanceof HTMLElement && item.image instanceof HTMLImageElement);
+  if (aboutParallaxItems.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
     let aboutParallaxQueued = false;
     const updateAboutParallax = () => {
-      const rect = aboutParallax.getBoundingClientRect();
-      const progress = Math.min(Math.max((innerHeight - rect.top) / (innerHeight + rect.height), 0), 1);
-      const offset = (progress - .5) * -76;
-      aboutParallaxImage.style.transform = 'translate3d(0, ' + offset + 'px, 0) scale(1.04)';
+      aboutParallaxItems.forEach((item) => {
+        if (!(item.frame instanceof HTMLElement) || !(item.image instanceof HTMLImageElement)) return;
+        const rect = item.frame.getBoundingClientRect();
+        const progress = Math.min(Math.max((innerHeight - rect.top) / (innerHeight + rect.height), 0), 1);
+        const offset = (progress - .5) * -76 * item.depth;
+        item.image.style.transform = 'translate3d(0, ' + offset + 'px, 0) scale(1.04)';
+      });
       aboutParallaxQueued = false;
     };
     const queueAboutParallax = () => {
