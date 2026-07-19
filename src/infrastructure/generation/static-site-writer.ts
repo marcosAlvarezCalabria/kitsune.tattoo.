@@ -616,7 +616,7 @@ const template = (inputProfile: CreatorProfile): string => {
   .artist-carousel-status span{color:var(--terra-light)}
   .artist-card .artist-carousel{padding:0 27px 28px}
   .artist-card .artist-carousel-track{gap:12px;padding:0 0 14px}
-  .artist-card .artist-work{flex-basis:88%;aspect-ratio:16/10;border-radius:15px}
+  .artist-card .artist-work{flex:0 0 88%;min-width:88%;aspect-ratio:16/10;border-radius:15px}
   .artist-card .artist-work-expand{left:12px;bottom:11px;font-size:.58rem}
   .artist-card .artist-carousel-control{top:calc(50% - 23px);width:36px;height:36px;font-size:1.1rem}
   .artist-card .artist-carousel-prev{left:-2px}.artist-card .artist-carousel-next{right:-2px}
@@ -640,7 +640,7 @@ const template = (inputProfile: CreatorProfile): string => {
   .artwork-lightbox img{display:block;width:100%;max-height:calc(100svh - 28px);object-fit:contain}
   .artwork-lightbox-close{position:absolute;z-index:1;top:15px;right:15px;border:1px solid rgba(241,229,215,.38);border-radius:999px;padding:9px 13px;background:rgba(10,13,12,.76);color:var(--cream);font:inherit;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
   @media(max-width:700px){.portfolio-dialog-shell{padding:16px}.portfolio-dialog-grid{grid-template-columns:repeat(2,1fr);gap:7px}.portfolio-dialog-head h2{font-size:2rem}}
-  @media(max-width:760px){.artist-card .artist-carousel{padding:0 0 28px}.artist-card .artist-carousel-track{gap:12px;padding:0}.artist-card .artist-work{flex-basis:88%;border-radius:15px}.artist-card .artist-carousel-control{display:none}.artist-work-expand{opacity:1;transform:none}.artist-carousel-status{bottom:0}.artwork-lightbox{border-radius:16px}}
+  @media(max-width:760px){.artist-card .artist-carousel{padding:0 0 28px}.artist-card .artist-carousel-track{gap:12px;padding:0}.artist-card .artist-work{flex:0 0 88%;min-width:88%;border-radius:15px}.artist-card .artist-carousel-control{display:none}.artist-work-expand{opacity:1;transform:none}.artist-carousel-status{bottom:0}.artwork-lightbox{border-radius:16px}}
 
   .process{background:var(--cream);color:var(--ink);padding:110px 0}
   .process-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.62fr);gap:70px;align-items:center;max-width:1020px;margin:0 auto}
