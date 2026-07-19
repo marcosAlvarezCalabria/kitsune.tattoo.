@@ -43,17 +43,18 @@ export class BuildBrandSite {
       generatedAssetsDirectory,
       `${handle}-profile`
     );
-    const heroVideoPath = await this.localAssetCopier.copyAsset(
-      HERO_VIDEO_SOURCE_PATH,
-      generatedAssetsDirectory,
-      HERO_VIDEO_OUTPUT_PREFIX
-    );
+    const heroVideoPath = await this.tryCopyHeroVideo(generatedAssetsDirectory, projectRoot);
     const externalFrameSequence = await this.tryCopyExternalFrameSequence(handle, generatedAssetsDirectory, projectRoot);
-    const heroFrameSequence = externalFrameSequence ?? await this.frameSequenceGenerator.generate(
-      heroVideoPath,
-      generatedAssetsDirectory,
-      HERO_FRAME_OUTPUT_PREFIX
-    );
+    const heroFrameSequence = externalFrameSequence
+      ?? (heroVideoPath
+        ? await this.frameSequenceGenerator.generate(heroVideoPath, generatedAssetsDirectory, HERO_FRAME_OUTPUT_PREFIX)
+        : null);
+
+    if (!heroFrameSequence) {
+      throw new Error(
+        `No hero frame sequence available. Provide frames in "${HERO_FRAMES_SOURCE_DIR}" or a video at "${HERO_VIDEO_SOURCE_PATH}".`
+      );
+    }
 
     const portfolioPosts = await Promise.all(
       scraped.postImages.slice(0, 9).map(async (post, index): Promise<PortfolioPost> => {
@@ -90,7 +91,9 @@ export class BuildBrandSite {
         localPath: toRelativeAssetPath(projectRoot, profileImagePath)
       },
       heroVideo: {
-        localPath: toRelativeAssetPath(projectRoot, heroVideoPath),
+        localPath: heroVideoPath
+          ? toRelativeAssetPath(projectRoot, heroVideoPath)
+          : toRelativeAssetPath(projectRoot, profileImagePath),
         posterPath: toRelativeAssetPath(projectRoot, profileImagePath)
       },
       heroFrameSequence: {
@@ -128,6 +131,21 @@ export class BuildBrandSite {
     }
   }
 
+  private async tryCopyHeroVideo(
+    generatedAssetsDirectory: string,
+    projectRoot: string
+  ): Promise<string | null> {
+    try {
+      return await this.localAssetCopier.copyAsset(
+        path.join(projectRoot, HERO_VIDEO_SOURCE_PATH),
+        generatedAssetsDirectory,
+        HERO_VIDEO_OUTPUT_PREFIX
+      );
+    } catch {
+      return null;
+    }
+  }
+
   private async tryCopyExternalFrameSequence(
     handle: string,
     generatedAssetsDirectory: string,
@@ -135,7 +153,7 @@ export class BuildBrandSite {
   ): Promise<{ framePaths: readonly string[]; width: number; height: number } | null> {
     try {
       const framePaths = await this.localAssetCopier.copyFrameSequence(
-        HERO_FRAMES_SOURCE_DIR,
+        path.join(projectRoot, HERO_FRAMES_SOURCE_DIR),
         generatedAssetsDirectory,
         HERO_FRAME_OUTPUT_PREFIX
       );
