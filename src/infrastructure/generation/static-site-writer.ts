@@ -155,11 +155,34 @@ const highlightMarkup = (profile: CreatorProfile): string =>
 const staffMarkup = (): string =>
   STUDIO_STAFF.map(
     (member, index) => {
+      const images = member.portfolioImages ?? [];
+      const dialogId = `${member.handle}-portfolio-dialog`;
       const profileMedia = member.profileImage
         ? `<div class="artist-identity-media"><img src="${escapeHtml(member.profileImage.imagePath)}" alt="${cleanText(member.profileImage.alt)}" loading="lazy">${member.profileVideo ? `<div class="artist-video artist-video-float" data-hover-video><video muted loop playsinline preload="metadata" poster="${escapeHtml(member.profileVideo.posterPath)}"><source src="${escapeHtml(member.profileVideo.videoPath)}" type="video/mp4"></video><span>Ver proceso</span></div>` : ""}</div>`
         : member.profileVideo
           ? `<div class="artist-video" data-hover-video><video muted loop playsinline preload="metadata" poster="${escapeHtml(member.profileVideo.posterPath)}"><source src="${escapeHtml(member.profileVideo.videoPath)}" type="video/mp4"></video><span>Hover para ver proceso</span></div>`
           : `<div class="artist-mark" aria-hidden="true">${cleanText(member.name.slice(0, 1))}</div>`;
+      const portfolioPreview = images.length
+        ? `
+          <div class="artist-card-portfolio">
+            <span class="artist-card-portfolio-label">Universo de ${cleanText(member.name)}</span>
+            <div class="artist-carousel" data-artist-carousel aria-label="Carrusel de trabajos de ${cleanText(member.name)}">
+              <button class="artist-carousel-control artist-carousel-prev" type="button" aria-label="Ver trabajo anterior">←</button>
+              <div class="artist-carousel-track" tabindex="0">
+                ${images.slice(0, 6).map((imagePath, imageIndex) => `<button class="artist-work" type="button" data-lightbox-image="${escapeHtml(imagePath)}" data-lightbox-alt="Trabajo de ${cleanText(member.name)} ${imageIndex + 1}" aria-label="Abrir trabajo ${imageIndex + 1} de ${cleanText(member.name)}"><img src="${escapeHtml(imagePath)}" alt="Trabajo de ${cleanText(member.name)} ${imageIndex + 1}" loading="lazy"><span class="artist-work-expand">Ver pieza</span></button>`).join("")}
+              </div>
+              <button class="artist-carousel-control artist-carousel-next" type="button" aria-label="Ver siguiente trabajo">→</button>
+              <div class="artist-carousel-status" aria-live="polite"><span>01</span> / ${String(Math.min(images.length, 6)).padStart(2, "0")}</div>
+            </div>
+            <div class="artist-portfolio-action"><button class="portfolio-open" type="button" data-portfolio-open="${dialogId}">Ver universo completo <span>${images.length} piezas</span></button></div>
+          </div>
+          <dialog class="portfolio-dialog" id="${dialogId}" aria-label="Portfolio completo de ${cleanText(member.name)}">
+            <div class="portfolio-dialog-shell">
+              <div class="portfolio-dialog-head"><div><span>Portfolio completo</span><h2>${cleanText(member.name)}</h2></div><button class="portfolio-close" type="button" data-portfolio-close aria-label="Cerrar portfolio">Cerrar</button></div>
+              <div class="portfolio-dialog-grid">${images.map((imagePath, imageIndex) => `<figure><img src="${escapeHtml(imagePath)}" alt="Trabajo de ${cleanText(member.name)} ${imageIndex + 1}" loading="lazy"></figure>`).join("")}</div>
+            </div>
+          </dialog>`
+        : "";
 
       return `
       <article class="artist-card artist-${member.theme}">
@@ -174,47 +197,10 @@ const staffMarkup = (): string =>
           <a href="${escapeHtml(member.profileUrl)}" target="_blank" rel="noreferrer">@${cleanText(member.handle)}</a>
           ${member.secondaryProfile ? `<a href="${escapeHtml(member.secondaryProfile.url)}" target="_blank" rel="noreferrer">@${cleanText(member.secondaryProfile.handle)} <small>${cleanText(member.secondaryProfile.label)}</small></a>` : ""}
         </div>
-        <p class="artist-portfolio-note">Portfolio visual proximo: solo fotos reales de ${cleanText(member.name)}.</p>
+        ${portfolioPreview}
       </article>`;
     }
   ).join("");
-
-const artistPortfolioMarkup = (): string =>
-  STUDIO_STAFF.filter((member) => (member.portfolioImages?.length ?? 0) > 0)
-    .map(
-      (member) => {
-        const images = member.portfolioImages ?? [];
-        const dialogId = `${member.handle}-portfolio-dialog`;
-
-        return `
-        <section class="artist-portfolio artist-portfolio-${member.theme}">
-          <div class="wrap">
-            <div class="artist-portfolio-head reveal">
-              <span class="sec-kicker" data-brush-write>portfolio de artista</span>
-              <h2 class="sec-title" data-brush-write>El universo de ${cleanText(member.name)}</h2>
-              <p>${cleanText(member.style)}</p>
-            </div>
-            <div class="artist-carousel reveal" data-artist-carousel aria-label="Carrusel de trabajos de ${cleanText(member.name)}">
-              <button class="artist-carousel-control artist-carousel-prev" type="button" aria-label="Ver trabajo anterior">←</button>
-              <div class="artist-carousel-track" tabindex="0">
-                ${images.slice(0, 6).map((imagePath, index) => `<button class="artist-work" type="button" data-lightbox-image="${escapeHtml(imagePath)}" data-lightbox-alt="Trabajo de ${cleanText(member.name)} ${index + 1}" aria-label="Abrir trabajo ${index + 1} de ${cleanText(member.name)}"><img src="${escapeHtml(imagePath)}" alt="Trabajo de ${cleanText(member.name)} ${index + 1}" loading="lazy"><span class="artist-work-expand">Ver pieza</span></button>`).join("")}
-              </div>
-              <button class="artist-carousel-control artist-carousel-next" type="button" aria-label="Ver siguiente trabajo">→</button>
-              <div class="artist-carousel-status" aria-live="polite"><span>01</span> / ${String(Math.min(images.length, 6)).padStart(2, "0")}</div>
-            </div>
-            <div class="artist-portfolio-action reveal"><button class="portfolio-open" type="button" data-portfolio-open="${dialogId}">Ver portfolio completo <span>${images.length} piezas</span></button></div>
-          </div>
-        </section>
-        <dialog class="portfolio-dialog" id="${dialogId}" aria-label="Portfolio completo de ${cleanText(member.name)}">
-          <div class="portfolio-dialog-shell">
-            <div class="portfolio-dialog-head"><div><span>Portfolio completo</span><h2>${cleanText(member.name)}</h2></div><button class="portfolio-close" type="button" data-portfolio-close aria-label="Cerrar portfolio">Cerrar</button></div>
-            <div class="portfolio-dialog-grid">
-              ${images.map((imagePath, index) => `<figure><img src="${escapeHtml(imagePath)}" alt="Trabajo de ${cleanText(member.name)} ${index + 1}" loading="lazy"></figure>`).join("")}
-            </div>
-          </div>
-        </dialog>`;
-      }
-    ).join("");
 
 const aboutPhotosMarkup = (posts: readonly PortfolioPost[]): string =>
   posts
@@ -607,12 +593,8 @@ const template = (inputProfile: CreatorProfile): string => {
   .artist-links a{color:var(--cream);text-decoration:none;border:1px solid rgba(241,229,215,.36);border-radius:999px;padding:7px 10px;font-size:.78rem;font-weight:600}
   .artist-links a:hover{background:rgba(241,229,215,.12)}
   .artist-links small{display:block;font-size:.64rem;opacity:.7;font-weight:400;margin-top:2px}
-  .artist-portfolio-note{margin-top:auto;padding-top:18px;font-size:.78rem;opacity:.68}
-  .artist-portfolio{background:#101113;padding:110px 0;color:var(--cream)}
-  .artist-portfolio-viktor{background:radial-gradient(circle at 20% 0%,#30373c 0%,#111315 45%,#050505 100%)}
-  .artist-portfolio-head{max-width:720px;margin:0 auto 42px;text-align:center}
-  .artist-portfolio-head .sec-title{color:var(--cream)}
-  .artist-portfolio-head p{margin-top:14px;opacity:.75}
+  .artist-card-portfolio{margin-top:24px;padding-top:17px;border-top:1px solid rgba(241,229,215,.25)}
+  .artist-card-portfolio-label{display:block;margin-bottom:11px;color:#f1c39d;font-size:.67rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
   [data-brush-write] .brush-letter{display:inline-block;opacity:0;transform:translate(-5px,6px) rotate(-3deg);filter:blur(3px)}
   [data-brush-write].is-writing .brush-letter{animation:brush-letter .42s cubic-bezier(.2,.75,.2,1) forwards;animation-delay:calc(var(--brush-index) * 35ms)}
   @keyframes brush-letter{0%{opacity:0;transform:translate(-5px,6px) rotate(-3deg);filter:blur(3px)}60%{opacity:1;transform:translate(2px,-1px) rotate(1deg);filter:blur(0)}100%{opacity:1;transform:none;filter:none}}
@@ -632,7 +614,14 @@ const template = (inputProfile: CreatorProfile): string => {
   .artist-carousel-prev{left:0}.artist-carousel-next{right:0}
   .artist-carousel-status{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:.7rem;font-weight:700;letter-spacing:.13em;color:rgba(241,229,215,.62)}
   .artist-carousel-status span{color:var(--terra-light)}
-  .artist-portfolio-action{text-align:center;margin-top:34px}
+  .artist-card .artist-carousel{padding:0 27px 25px}
+  .artist-card .artist-carousel-track{gap:10px;padding:0 0 12px}
+  .artist-card .artist-work{flex-basis:78%;aspect-ratio:4/3;border-radius:13px}
+  .artist-card .artist-work-expand{left:12px;bottom:11px;font-size:.58rem}
+  .artist-card .artist-carousel-control{top:calc(50% - 23px);width:36px;height:36px;font-size:1.1rem}
+  .artist-card .artist-carousel-prev{left:-2px}.artist-card .artist-carousel-next{right:-2px}
+  .artist-card .artist-carousel-status{font-size:.62rem}
+  .artist-portfolio-action{text-align:center;margin-top:10px}
   .portfolio-open{cursor:pointer;border:1px solid rgba(241,229,215,.45);color:var(--cream);background:transparent;border-radius:999px;padding:13px 20px;font:600 .92rem 'Outfit',sans-serif;transition:background .25s ease,transform .25s ease}
   .portfolio-open span{color:#f1c39d;margin-left:7px;font-size:.78rem}
   .portfolio-open:hover{background:rgba(241,229,215,.12);transform:translateY(-2px)}
@@ -651,7 +640,7 @@ const template = (inputProfile: CreatorProfile): string => {
   .artwork-lightbox img{display:block;width:100%;max-height:calc(100svh - 28px);object-fit:contain}
   .artwork-lightbox-close{position:absolute;z-index:1;top:15px;right:15px;border:1px solid rgba(241,229,215,.38);border-radius:999px;padding:9px 13px;background:rgba(10,13,12,.76);color:var(--cream);font:inherit;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
   @media(max-width:700px){.portfolio-dialog-shell{padding:16px}.portfolio-dialog-grid{grid-template-columns:repeat(2,1fr);gap:7px}.portfolio-dialog-head h2{font-size:2rem}}
-  @media(max-width:760px){.artist-portfolio{padding:78px 0}.artist-carousel{padding:0 0 32px}.artist-carousel-track{gap:12px;padding-left:5vw;padding-right:5vw}.artist-work{flex-basis:78vw;border-radius:16px}.artist-carousel-control{display:none}.artist-work-expand{opacity:1;transform:none}.artist-carousel-status{bottom:0}.artwork-lightbox{border-radius:16px}}
+  @media(max-width:760px){.artist-card .artist-carousel{padding:0 0 28px}.artist-card .artist-carousel-track{gap:10px;padding:0}.artist-card .artist-work{flex-basis:76%;border-radius:13px}.artist-card .artist-carousel-control{display:none}.artist-work-expand{opacity:1;transform:none}.artist-carousel-status{bottom:0}.artwork-lightbox{border-radius:16px}}
 
   .process{background:var(--cream);color:var(--ink);padding:110px 0}
   .process-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.62fr);gap:70px;align-items:center;max-width:1020px;margin:0 auto}
@@ -837,8 +826,6 @@ const template = (inputProfile: CreatorProfile): string => {
     <p class="team-note">Kitsune Tattoo · Leganes, Av. de la Mancha 18. Cada portfolio se integrara con su propia direccion visual y fotos reales del artista.</p>
   </div>
 </section>
-
-${artistPortfolioMarkup()}
 
 <dialog class="artwork-lightbox" id="artworkLightbox" aria-label="Vista ampliada del tatuaje">
   <button class="artwork-lightbox-close" type="button" aria-label="Cerrar imagen">Cerrar</button>
