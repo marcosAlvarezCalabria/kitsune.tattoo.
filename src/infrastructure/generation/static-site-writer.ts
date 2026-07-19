@@ -202,11 +202,16 @@ const staffMarkup = (): string =>
     }
   ).join("");
 
-const aboutPhotosMarkup = (posts: readonly PortfolioPost[]): string =>
-  posts
-    .slice(0, 4)
-    .map((post) => `<img src="${escapeHtml(post.localPath)}" alt="${cleanText(post.caption)}" loading="lazy">`)
-    .join("");
+const aboutParallaxMarkup = (posts: readonly PortfolioPost[], fallbackImage: string): string => {
+  const image = posts[0];
+  const imagePath = image?.localPath ?? fallbackImage;
+  const imageAlt = image ? cleanText(image.caption) : "Trabajo de Kitsune Tattoo";
+
+  return `<div class="about-parallax-frame" data-about-parallax>
+    <img src="${escapeHtml(imagePath)}" alt="${imageAlt}" loading="lazy" data-about-parallax-image>
+    <span class="about-parallax-label">Kitsune Tattoo · Leganes</span>
+  </div>`;
+};
 
 const template = (inputProfile: CreatorProfile): string => {
   const profile = normalizeProfile(inputProfile);
@@ -474,12 +479,21 @@ const template = (inputProfile: CreatorProfile): string => {
     background:rgba(241,229,215,.1);border:1px solid rgba(241,229,215,.25);
     padding:8px 18px;border-radius:999px;font-size:.88rem;font-weight:500;
   }
-  .about-photos{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .about-photos img{
-    width:100%;aspect-ratio:1;object-fit:cover;border-radius:18px;display:block;
-    box-shadow:0 14px 34px rgba(0,0,0,.3);
+  .about-parallax-frame{
+    position:relative;min-height:540px;overflow:hidden;border-radius:22px;
+    background:var(--green-deep);box-shadow:0 20px 48px rgba(0,0,0,.36);
   }
-  .about-photos img:nth-child(2){transform:translateY(26px)}
+  .about-parallax-frame::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,13,12,.05),rgba(10,13,12,.48))}
+  .about-parallax-frame img{
+    position:absolute;top:-9%;left:0;width:100%;height:118%;object-fit:cover;
+    transform:translate3d(0,0,0) scale(1.04);will-change:transform;
+  }
+  .about-parallax-label{
+    position:absolute;right:18px;bottom:14px;z-index:1;color:var(--cream);font-size:.67rem;
+    font-weight:700;letter-spacing:.16em;text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,.7);
+  }
+  @media(max-width:860px){.about-parallax-frame{min-height:420px;max-width:560px}}
+  @media(prefers-reduced-motion:reduce){.about-parallax-frame img{transform:scale(1.04)!important}}
 
   .brew{background:var(--green-deep);position:relative;overflow:hidden}
   .style-showcase{height:350svh;background:#111;overflow:visible}
@@ -780,8 +794,8 @@ const template = (inputProfile: CreatorProfile): string => {
         ${pillsMarkup(profile)}
       </div>
     </div>
-    <div class="about-photos reveal">
-      ${aboutPhotosMarkup(profile.portfolioPosts)}
+    <div class="about-parallax reveal">
+      ${aboutParallaxMarkup(profile.portfolioPosts, profile.profileImage.localPath)}
     </div>
   </div>
 </section>
@@ -1027,6 +1041,27 @@ const template = (inputProfile: CreatorProfile): string => {
       try { await processVideo.play(); } catch { processVideoShell.classList.remove('playing'); }
     });
     processVideo.addEventListener('ended', () => processVideoShell.classList.remove('playing'));
+  }
+
+  const aboutParallax = document.querySelector('[data-about-parallax]');
+  const aboutParallaxImage = document.querySelector('[data-about-parallax-image]');
+  if (aboutParallax instanceof HTMLElement && aboutParallaxImage instanceof HTMLImageElement && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let aboutParallaxQueued = false;
+    const updateAboutParallax = () => {
+      const rect = aboutParallax.getBoundingClientRect();
+      const progress = Math.min(Math.max((innerHeight - rect.top) / (innerHeight + rect.height), 0), 1);
+      const offset = (progress - .5) * -76;
+      aboutParallaxImage.style.transform = 'translate3d(0, ' + offset + 'px, 0) scale(1.04)';
+      aboutParallaxQueued = false;
+    };
+    const queueAboutParallax = () => {
+      if (aboutParallaxQueued) return;
+      aboutParallaxQueued = true;
+      requestAnimationFrame(updateAboutParallax);
+    };
+    addEventListener('scroll', queueAboutParallax, { passive:true });
+    addEventListener('resize', queueAboutParallax, { passive:true });
+    queueAboutParallax();
   }
 
   const heroScrollVideo = document.getElementById('heroScrollVideo');
