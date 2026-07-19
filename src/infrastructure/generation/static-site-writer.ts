@@ -191,13 +191,13 @@ const staffMarkup = (): string =>
         <p class="artist-role">${cleanText(member.role)}</p>
         <h3>${cleanText(member.name)}</h3>
         <p class="artist-fullname">${cleanText(member.fullName)}</p>
+        ${portfolioPreview}
         <p class="artist-intro">${cleanText(member.intro)}</p>
         <div class="artist-style"><span>Especialidad</span><p>${cleanText(member.style)}</p></div>
         <div class="artist-links">
           <a href="${escapeHtml(member.profileUrl)}" target="_blank" rel="noreferrer">@${cleanText(member.handle)}</a>
           ${member.secondaryProfile ? `<a href="${escapeHtml(member.secondaryProfile.url)}" target="_blank" rel="noreferrer">@${cleanText(member.secondaryProfile.handle)} <small>${cleanText(member.secondaryProfile.label)}</small></a>` : ""}
         </div>
-        ${portfolioPreview}
       </article>`;
     }
   ).join("");
@@ -593,7 +593,7 @@ const template = (inputProfile: CreatorProfile): string => {
   .artist-links a{color:var(--cream);text-decoration:none;border:1px solid rgba(241,229,215,.36);border-radius:999px;padding:7px 10px;font-size:.78rem;font-weight:600}
   .artist-links a:hover{background:rgba(241,229,215,.12)}
   .artist-links small{display:block;font-size:.64rem;opacity:.7;font-weight:400;margin-top:2px}
-  .artist-card-portfolio{margin-top:24px;padding-top:17px;border-top:1px solid rgba(241,229,215,.25)}
+  .artist-card-portfolio{margin:23px 0 4px;padding:17px 0 3px;border-top:1px solid rgba(241,229,215,.25);border-bottom:1px solid rgba(241,229,215,.16)}
   .artist-card-portfolio-label{display:block;margin-bottom:11px;color:#f1c39d;font-size:.67rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
   [data-brush-write] .brush-letter{display:inline-block;opacity:0;transform:translate(-5px,6px) rotate(-3deg);filter:blur(3px)}
   [data-brush-write].is-writing .brush-letter{animation:brush-letter .42s cubic-bezier(.2,.75,.2,1) forwards;animation-delay:calc(var(--brush-index) * 35ms)}
@@ -614,9 +614,9 @@ const template = (inputProfile: CreatorProfile): string => {
   .artist-carousel-prev{left:0}.artist-carousel-next{right:0}
   .artist-carousel-status{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:.7rem;font-weight:700;letter-spacing:.13em;color:rgba(241,229,215,.62)}
   .artist-carousel-status span{color:var(--terra-light)}
-  .artist-card .artist-carousel{padding:0 27px 25px}
-  .artist-card .artist-carousel-track{gap:10px;padding:0 0 12px}
-  .artist-card .artist-work{flex-basis:78%;aspect-ratio:4/3;border-radius:13px}
+  .artist-card .artist-carousel{padding:0 27px 28px}
+  .artist-card .artist-carousel-track{gap:12px;padding:0 0 14px}
+  .artist-card .artist-work{flex-basis:88%;aspect-ratio:16/10;border-radius:15px}
   .artist-card .artist-work-expand{left:12px;bottom:11px;font-size:.58rem}
   .artist-card .artist-carousel-control{top:calc(50% - 23px);width:36px;height:36px;font-size:1.1rem}
   .artist-card .artist-carousel-prev{left:-2px}.artist-card .artist-carousel-next{right:-2px}
@@ -640,7 +640,7 @@ const template = (inputProfile: CreatorProfile): string => {
   .artwork-lightbox img{display:block;width:100%;max-height:calc(100svh - 28px);object-fit:contain}
   .artwork-lightbox-close{position:absolute;z-index:1;top:15px;right:15px;border:1px solid rgba(241,229,215,.38);border-radius:999px;padding:9px 13px;background:rgba(10,13,12,.76);color:var(--cream);font:inherit;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
   @media(max-width:700px){.portfolio-dialog-shell{padding:16px}.portfolio-dialog-grid{grid-template-columns:repeat(2,1fr);gap:7px}.portfolio-dialog-head h2{font-size:2rem}}
-  @media(max-width:760px){.artist-card .artist-carousel{padding:0 0 28px}.artist-card .artist-carousel-track{gap:10px;padding:0}.artist-card .artist-work{flex-basis:76%;border-radius:13px}.artist-card .artist-carousel-control{display:none}.artist-work-expand{opacity:1;transform:none}.artist-carousel-status{bottom:0}.artwork-lightbox{border-radius:16px}}
+  @media(max-width:760px){.artist-card .artist-carousel{padding:0 0 28px}.artist-card .artist-carousel-track{gap:12px;padding:0}.artist-card .artist-work{flex-basis:88%;border-radius:15px}.artist-card .artist-carousel-control{display:none}.artist-work-expand{opacity:1;transform:none}.artist-carousel-status{bottom:0}.artwork-lightbox{border-radius:16px}}
 
   .process{background:var(--cream);color:var(--ink);padding:110px 0}
   .process-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.62fr);gap:70px;align-items:center;max-width:1020px;margin:0 auto}
@@ -972,25 +972,21 @@ const template = (inputProfile: CreatorProfile): string => {
       current.textContent = String(Math.max(1, position)).padStart(2, '0');
     };
     const move = (direction) => track.scrollBy({ left: direction * track.clientWidth * .86, behavior: 'smooth' });
-    let paused = false;
     let manualPauseUntil = 0;
+    let autoIndex = 0;
     const pauseForInteraction = () => { manualPauseUntil = Date.now() + 6000; };
     const advance = () => {
-      if (paused || Date.now() < manualPauseUntil) return;
-      const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
-      if (atEnd) {
-        track.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        move(1);
-      }
+      if (Date.now() < manualPauseUntil) return;
+      const firstCard = track.querySelector('.artist-work');
+      const totalCards = track.querySelectorAll('.artist-work').length;
+      if (!(firstCard instanceof HTMLElement) || totalCards < 2) return;
+      const gap = Number.parseFloat(getComputedStyle(track).gap) || 0;
+      autoIndex = (autoIndex + 1) % totalCards;
+      track.scrollTo({ left: autoIndex * (firstCard.offsetWidth + gap), behavior: 'smooth' });
     };
     previous?.addEventListener('click', () => { pauseForInteraction(); move(-1); });
     next?.addEventListener('click', () => { pauseForInteraction(); move(1); });
     track.addEventListener('scroll', updatePosition, { passive:true });
-    carousel.addEventListener('mouseenter', () => { paused = true; });
-    carousel.addEventListener('mouseleave', () => { paused = false; });
-    carousel.addEventListener('focusin', () => { paused = true; });
-    carousel.addEventListener('focusout', () => { paused = false; });
     track.addEventListener('pointerdown', pauseForInteraction, { passive:true });
     setTimeout(advance, 900);
     setInterval(advance, 1800);
