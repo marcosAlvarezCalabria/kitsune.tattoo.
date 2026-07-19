@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import type { CreatorProfile, PortfolioPost } from "../../domain/profile.js";
-import { DRAWING_PROCESS_MEDIA, STYLE_SHOWCASE_FRAMES } from "../config/studio-media.js";
+import { DRAWING_PROCESS_MEDIA, STYLE_SHOWCASE_VIDEO } from "../config/studio-media.js";
 import { STUDIO_STAFF } from "../config/studio-staff.js";
 
 const escapeHtml = (value: string): string =>
@@ -215,7 +215,6 @@ const template = (inputProfile: CreatorProfile): string => {
   const following = getMetricValue(profile, "Siguiendo");
   const heroPoster = profile.heroFrameSequence.framePaths[0] ?? profile.heroVideo.posterPath;
   const heroFramesJson = JSON.stringify(profile.heroFrameSequence.framePaths);
-  const styleFramesJson = JSON.stringify(STYLE_SHOWCASE_FRAMES);
   const aboutLead = compactText(profile.portfolioPosts[0]?.caption ?? "Tattoo portfolio");
   const aboutSupport = compactText(profile.portfolioPosts[2]?.caption ?? "Japanese and color tattoo work.");
 
@@ -489,8 +488,8 @@ const template = (inputProfile: CreatorProfile): string => {
   .brew{background:var(--green-deep);position:relative;overflow:hidden}
   .style-showcase{height:350svh;background:#111;overflow:visible}
   .styles-sticky{position:sticky;top:0;height:100svh;min-height:700px;overflow:hidden}
-  .styles-media,.styles-frame-stage,.styles-frame-stage img,.styles-scrim{position:absolute;inset:0;width:100%;height:100%}
-  .styles-frame-stage img{object-fit:cover;display:block}
+  .styles-media,.styles-scroll-video,.styles-scrim{position:absolute;inset:0;width:100%;height:100%}
+  .styles-scroll-video{object-fit:cover;display:block;background:#111}
   .styles-scrim{background:linear-gradient(180deg,rgba(5,8,7,.44),rgba(5,8,7,.64));z-index:1}
   .styles-video-copy{position:absolute;z-index:2;left:5vw;top:50%;transform:translateY(-50%);max-width:560px;color:var(--cream);pointer-events:none}
   .styles-video-copy span{display:block;font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#f1c39d;margin-bottom:11px}
@@ -794,7 +793,7 @@ const template = (inputProfile: CreatorProfile): string => {
 
 <section class="brew style-showcase" id="styles">
   <div class="styles-sticky">
-    <div class="styles-media"><div class="styles-frame-stage" id="stylesFrameStage" data-frames='${escapeHtml(styleFramesJson)}'><img src="${escapeHtml(STYLE_SHOWCASE_FRAMES[0] ?? "")}" alt="Ambiente del estudio" id="stylesFrameCurrent"></div></div>
+    <div class="styles-media"><video class="styles-scroll-video" id="stylesScrollVideo" muted playsinline preload="auto" poster="${escapeHtml(STYLE_SHOWCASE_VIDEO.posterPath)}" aria-label="Ambiente del estudio"><source src="${escapeHtml(STYLE_SHOWCASE_VIDEO.videoPath)}" type="video/mp4"></video></div>
     <div class="styles-scrim"></div>
     <div class="styles-video-copy"><span>Kitsune Tattoo</span><h2>Un estilo para cada piel.</h2><p>No hacemos de todo: dominamos lo nuestro y lo llevamos al limite.</p></div>
   </div>
@@ -1117,40 +1116,10 @@ const template = (inputProfile: CreatorProfile): string => {
   preloadHeroFrames();
   setHeroFrame(0);
 
-  const stylesFrameStage = document.getElementById('stylesFrameStage');
-  const stylesFrameCurrent = document.getElementById('stylesFrameCurrent');
+  const stylesScrollVideo = document.getElementById('stylesScrollVideo');
   const stylesSection = document.getElementById('styles');
-  const styleFramePaths = (() => {
-    if (!stylesFrameStage) return [];
-    try { return JSON.parse(stylesFrameStage.dataset.frames || '[]'); } catch { return []; }
-  })();
   let styleTargetProgress = 0;
   let styleCurrentProgress = 0;
-  let styleCurrentFrame = 0;
-  const styleFrameCache = [];
-  function preloadStyleFrame(index) {
-    if (!styleFramePaths[index] || styleFrameCache[index]) return;
-    const image = new Image();
-    image.decoding = 'async';
-    image.src = styleFramePaths[index];
-    styleFrameCache[index] = image;
-  }
-  function preloadStyleFrames() {
-    const initialCount = matchMedia('(max-width: 820px)').matches ? 36 : styleFramePaths.length;
-    styleFramePaths.slice(0, initialCount).forEach((_, index) => preloadStyleFrame(index));
-  }
-  function preloadStyleWindow(index) {
-    if (!matchMedia('(max-width: 820px)').matches) return;
-    for (let nextIndex = index + 1; nextIndex <= Math.min(index + 36, styleFramePaths.length - 1); nextIndex += 1) preloadStyleFrame(nextIndex);
-  }
-  function setStyleFrame(index) {
-    if (!stylesFrameCurrent || !styleFramePaths.length) return;
-    const safeIndex = Math.max(0, Math.min(index, styleFramePaths.length - 1));
-    preloadStyleWindow(safeIndex);
-    if (safeIndex === styleCurrentFrame) return;
-    styleCurrentFrame = safeIndex;
-    stylesFrameCurrent.src = styleFramePaths[safeIndex];
-  }
   function updateStyleProgress() {
     if (!stylesSection) return;
     const distance = Math.max(stylesSection.offsetHeight - innerHeight, 1);
@@ -1161,10 +1130,15 @@ const template = (inputProfile: CreatorProfile): string => {
   (function stylesScrubLoop() {
     styleCurrentProgress += (styleTargetProgress - styleCurrentProgress) * .06;
     if (Math.abs(styleTargetProgress - styleCurrentProgress) <= .0004) styleCurrentProgress = styleTargetProgress;
-    setStyleFrame(Math.round(styleCurrentProgress * (styleFramePaths.length - 1)));
+    if (stylesScrollVideo instanceof HTMLVideoElement && Number.isFinite(stylesScrollVideo.duration) && stylesScrollVideo.duration > 0) {
+      const targetTime = styleCurrentProgress * stylesScrollVideo.duration;
+      // The exported MP4 uses an intra-only GOP, so each scroll seek can render immediately.
+      if (!stylesScrollVideo.seeking && Math.abs(stylesScrollVideo.currentTime - targetTime) > (1 / 30)) {
+        stylesScrollVideo.currentTime = targetTime;
+      }
+    }
     requestAnimationFrame(stylesScrubLoop);
   })();
-  preloadStyleFrames();
   updateStyleProgress();
 
   document.getElementById('year').textContent = new Date().getFullYear();
