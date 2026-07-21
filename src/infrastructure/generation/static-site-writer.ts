@@ -267,8 +267,8 @@ const template = (inputProfile: CreatorProfile): string => {
   .site-loader::after{width:min(53vw,460px);border-style:dashed;border-color:rgba(241,229,215,.2);animation:loader-orbit 5s linear infinite reverse}
   .site-loader-inner{position:relative;z-index:1;display:grid;justify-items:center;gap:18px}
   .site-loader-mask{
-    width:clamp(190px,29vw,310px);aspect-ratio:1;object-fit:cover;object-position:center 42%;
-    border-radius:50%;clip-path:circle(50%);background:#000;filter:drop-shadow(0 18px 26px rgba(0,0,0,.72));
+    width:auto;height:clamp(250px,34vw,390px);object-fit:contain;object-position:center;
+    background:transparent;filter:drop-shadow(0 18px 26px rgba(0,0,0,.72));
     animation:loader-mask-spin 2.8s cubic-bezier(.45,.05,.55,.95) infinite;
   }
   .site-loader-label{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--cream-soft)}
@@ -748,7 +748,7 @@ const template = (inputProfile: CreatorProfile): string => {
 
 <div class="site-loader" id="siteLoader" role="status" aria-label="Cargando Kitsune Tattoo">
   <div class="site-loader-inner">
-    <img class="site-loader-mask" src="assets/brand/kitsune-loader-mask.jpg" alt="" aria-hidden="true">
+    <img class="site-loader-mask" src="assets/brand/kitsune-loader-mask.png" alt="" aria-hidden="true">
   </div>
 </div>
 
